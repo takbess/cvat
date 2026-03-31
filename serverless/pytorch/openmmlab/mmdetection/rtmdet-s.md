@@ -12,10 +12,10 @@
 ## 前提条件
 
 1. **CVAT の Docker 環境**が起動していること（`docker compose up` 等）。
-2. **サーバレス（Nuclio）を有効にする**構成。  
-   リポジトリでは `docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml up -d` のように **serverless 用の compose を重ねる**方法が想定されています。  
+2. **サーバレス（Nuclio）を有効にする**構成。
+   リポジトリでは `docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml up -d` のように **serverless 用の compose を重ねる**方法が想定されています。
    これにより `CVAT_SERVERLESS=1` と、`cvat_server` / `cvat_worker_annotation` への `host.docker.internal` の付与が行われます。
-3. **`nuctl`**（Nuclio CLI）がインストール済みであること。  
+3. **`nuctl`**（Nuclio CLI）がインストール済みであること。
    公式ドキュメントの [Automatic annotation](https://docs.cvat.ai/docs/administration/community/advanced/installation_automatic_annotation/) を参照。
 4. **GPU 版**を使う場合は、NVIDIA ドライバ・Docker から GPU が利用できること。
 
