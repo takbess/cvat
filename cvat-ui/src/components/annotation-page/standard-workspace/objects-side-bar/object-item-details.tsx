@@ -71,7 +71,7 @@ function ItemAttributesComponent(props: Props): JSX.Element | null {
     } = props;
 
     const isConsensus = source === Source.CONSENSUS;
-    const withScore = isConsensus;
+    const withScore = Number.isFinite(score);
     const withVotes = isConsensus;
 
     const hasDetails = attributes.length > 0 || sizeParams !== null;
@@ -84,7 +84,7 @@ function ItemAttributesComponent(props: Props): JSX.Element | null {
 
     const scoreTag = withScore ? (
         <Tooltip
-            title='Consensus score'
+            title={isConsensus ? 'Consensus score' : 'Confidence score'}
             align={{
                 ...baseTooltipAlign,
                 targetOffset: ['25%', '40%'],

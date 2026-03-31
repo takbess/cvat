@@ -3294,7 +3294,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
             label, clientID, attributes, source, descriptions, score, votes,
         } = state;
         const isConsensus = source === 'consensus';
-        const withScore = isConsensus && !options.isSkeletonElement;
+        const withScore = !options.isSkeletonElement && Number.isFinite(score);
         const withVotes = isConsensus && !options.isSkeletonElement;
 
         const attrNames = Object.fromEntries(state.label.attributes.map((attr) => [attr.id, attr.name]));
@@ -3352,7 +3352,8 @@ export class CanvasViewImpl implements CanvasView, Listener {
                 if (withScore || withVotes) {
                     const parts = [];
                     if (withScore) {
-                        parts.push(`Score: ${score.toFixed(2)}`);
+                        const scorePrefix = isConsensus ? 'Score' : 'Confidence';
+                        parts.push(`${scorePrefix}: ${score.toFixed(2)}`);
                     }
                     if (withVotes) {
                         parts.push(`Votes: ${votes}`);

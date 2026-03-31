@@ -784,6 +784,16 @@ class DetectionResultConverter:
         serializer.is_valid(raise_exception=True)
         return serializer.validated_data
 
+    @staticmethod
+    def _parse_score(anno: dict) -> float:
+        for key in ("confidence", "score"):
+            if key in anno:
+                try:
+                    return float(anno[key])
+                except (TypeError, ValueError):
+                    continue
+        return 1.0
+
     def _parse_anno(
         self, *, labels: dict, conv_mask_to_poly: bool, frame: int, anno: dict
     ) -> dict | None:
@@ -803,6 +813,7 @@ class DetectionResultConverter:
                 "frame": frame,
                 "label_id": label["id"],
                 "source": "auto",
+                "score": self._parse_score(anno),
                 "attributes": attrs,
                 "group": None,
             }
@@ -811,6 +822,7 @@ class DetectionResultConverter:
                 "frame": frame,
                 "label_id": label["id"],
                 "source": "auto",
+                "score": self._parse_score(anno),
                 "attributes": attrs,
                 "group": anno["group_id"] if "group_id" in anno else None,
                 "type": anno["type"],
@@ -864,6 +876,7 @@ class DetectionResultConverter:
                             "frame": frame,
                             "label_id": sublabel_body["id"],
                             "source": "auto",
+                            "score": 1.0,
                             "attributes": [],
                             "group": None,
                             "type": sublabel_body["type"],
