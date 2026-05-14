@@ -1,0 +1,51 @@
+metadata:
+  name: pth-openmmlab-mmdetection-yolox-s-web-train-0515
+  namespace: cvat
+  annotations:
+    name: YOLOX-s person (web_train 2026-0515)
+    type: detector
+    spec: |
+      [
+        { "id": 0, "name": "person", "type": "rectangle" }
+      ]
+
+spec:
+  description: YOLOX-s finetuned (1 class person) via MMDetection — assets from work_dir last_checkpoint
+  runtime: 'python:3.10'
+  handler: main:handler
+  eventTimeout: 30s
+  build:
+    image: cvat.pth.openmmlab.mmdetection.yolox_s_web_train_0515:latest-gpu
+    baseImage: pytorch/pytorch:2.1.2-cuda12.1-cudnn8-runtime
+
+    directives:
+      preCopy:
+        - kind: RUN
+          value: apt-get update && apt-get install --no-install-recommends -y wget libglib2.0-0 libsm6 libxext6 libxrender1 libxcb1 libgl1 && rm -rf /var/lib/apt/lists/*
+        - kind: RUN
+          value: pip install --no-cache-dir -U openmim "numpy<2"
+        - kind: RUN
+          value: mim install mmengine "mmcv>=2.0.1,<2.2.0" "mmdet==3.3.0"
+        - kind: RUN
+          value: pip install --no-cache-dir "numpy<2"
+        - kind: WORKDIR
+          value: /opt/nuclio
+
+  triggers:
+    myHttpTrigger:
+      numWorkers: 1
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 10000
+      attributes:
+        maxRequestBodySize: 33554432 # 32MB
+
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume

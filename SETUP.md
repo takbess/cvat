@@ -93,6 +93,10 @@ docker compose -f docker-compose.yml -f components/serverless/docker-compose.ser
 
 開発用オーバーレイを付けた場合は、同じ `-f` の組み合わせで `down` してください。
 
+## 7. 再起動
+```bash
+docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml up -d
+```
 ---
 
 参考（公式）: [Semi-automatic and Automatic Annotation (installation)](https://github.com/cvat-ai/cvat/blob/develop/site/content/en/docs/administration/community/advanced/installation_automatic_annotation.md)
