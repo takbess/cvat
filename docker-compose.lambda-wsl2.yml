@@ -1,0 +1,14 @@
+# WSL2/Docker Desktop: mount patched lambda_manager (nuclio-nuclio-<id>:8080 invoke).
+# Use from CVAT repo root:
+#   docker compose -f docker-compose.yml \
+#     -f components/serverless/docker-compose.serverless.yml \
+#     -f docker-compose.lambda-wsl2.yml up -d
+
+services:
+  cvat_server:
+    volumes:
+      - ./cvat/apps/lambda_manager/views.py:/home/django/cvat/apps/lambda_manager/views.py:ro
+
+  cvat_worker_annotation:
+    volumes:
+      - ./cvat/apps/lambda_manager/views.py:/home/django/cvat/apps/lambda_manager/views.py:ro

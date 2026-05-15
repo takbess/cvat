@@ -12,13 +12,25 @@
 リポジトリのルートで次を実行します。**自動アノテーション用の Nuclio は `components/serverless/docker-compose.serverless.yml` で定義されています。**
 
 ```bash
+# 基本はこちら
 docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml up -d
+# WSL2の時、再起動時にポート番号が変わったりするため以下
+docker compose -f docker-compose.yml \
+  -f components/serverless/docker-compose.serverless.yml \
+  -f docker-compose.lambda-wsl2.yml up -d
 ```
+
+`docker-compose.lambda-wsl2.yml` は WSL2 上で Nuclio 関数へ確実に届けるためのパッチ（`views.py` マウント）です。
 
 開発用オーバーレイを併用する場合（任意）:
 
 ```bash
+# 基本はこちら
 docker compose -f docker-compose.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d
+# WSL2の時
+docker compose -f docker-compose.yml -f docker-compose.dev.yml \
+  -f components/serverless/docker-compose.serverless.yml \
+  -f docker-compose.lambda-wsl2.yml up -d
 ```
 
 ### 重要: 手動で Nuclio ダッシュボードを別起動しない
@@ -83,19 +95,51 @@ nuctl get function --platform local
 | `stat .../function.yaml: no such file` | 存在しないパス（例: `serverless/openvino/omz/public/yolo-v3-tf`）を指定した | 上記の **YOLOv7** パスを使う |
 | `Bind for 0.0.0.0:8070 failed: port is already allocated` | 手動 `nuclio-dashboard` などが 8070 を使用中 | 競合コンテナを停止・削除し、serverless 用 compose のみで起動 |
 | 関数は `ready` だが CVAT にモデルが出ない | `cvat_server` が `nuclio` に到達できていない | serverless compose で `nuclio` と `cvat_server` が同じネットワークで起動しているか確認。手動ダッシュボードをやめる |
+| **Fetching inference status for task #N** / 自動アノテーション直後に失敗 | WSL2 で `host.docker.internal` + 誤った Nuclio ポート、または関数 URL の不整合 | 下記「自動アノテーション接続エラー」を参照 |
 | GPU が使われない | `deploy_gpu.sh` の関数に GPU リソースが付いていない、またはドライバ/Toolkit 不備 | `nvidia-smi`、Nuclio 関数コンテナのログを確認 |
+
+### 自動アノテーション接続エラー（WSL2 / Docker Desktop）
+
+`docker-compose.lambda-wsl2.yml` でパッチ済み `views.py` をマウントし、Docker ネットワーク上の `nuclio-nuclio-<関数名>:8080` へ直接呼び出すようにしています（WSL2 で `host.docker.internal` が使えない問題の対策）。
+
+**compose を更新したあと**は CVAT を再起動してください。
+
+```bash
+docker compose -f docker-compose.yml \
+  -f components/serverless/docker-compose.serverless.yml \
+  -f docker-compose.lambda-wsl2.yml up -d
+```
+
+ログ確認:
+
+```bash
+docker logs cvat_worker_annotation --tail 80
+```
+
+`host.docker.internal` への `ConnectionError` が出なくなれば解消です。
 
 ## 6. 停止
 
 ```bash
+# 基本はこちら
 docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml down
+
+# WSL2の時
+docker compose -f docker-compose.yml \
+  -f components/serverless/docker-compose.serverless.yml \
+  -f docker-compose.lambda-wsl2.yml down
 ```
 
 開発用オーバーレイを付けた場合は、同じ `-f` の組み合わせで `down` してください。
 
 ## 7. 再起動
 ```bash
+# 基本はこちら
 docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml up -d
+# WSL2の時
+docker compose -f docker-compose.yml \
+  -f components/serverless/docker-compose.serverless.yml \
+  -f docker-compose.lambda-wsl2.yml up -d
 ```
 ---
 

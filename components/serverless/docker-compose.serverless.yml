@@ -24,9 +24,12 @@ services:
   cvat_server:
     environment:
       CVAT_SERVERLESS: 1
+      CVAT_NUCLIO_HOST: nuclio
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
   cvat_worker_annotation:
+    environment:
+      CVAT_NUCLIO_HOST: nuclio
     extra_hosts:
       - "host.docker.internal:host-gateway"

@@ -139,10 +139,12 @@ class LambdaGateway:
         )
 
     def _invoke_directly(self, func, payload):
-        # host.docker.internal for Linux will work only with Docker 20.10+
         NUCLIO_TIMEOUT = settings.NUCLIO["DEFAULT_TIMEOUT"]
         if os.path.exists("/.dockerenv"):  # inside a docker container
-            url = f"http://host.docker.internal:{func.port}"
+            # Prefer the function container on the Compose network. On WSL2/Linux,
+            # host.docker.internal + Nuclio's httpPort often do not match the published
+            # host port, which breaks automatic annotation.
+            url = f"http://nuclio-nuclio-{func.id}:8080"
         else:
             url = f"http://localhost:{func.port}"
 
